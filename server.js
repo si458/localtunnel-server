@@ -40,7 +40,7 @@ const stats = {
 
 // handle proxying a request to a client
 // will wait for a tunnel socket to become available
-function maybe_bounce(req, res, sock, head) {
+function maybe_bounce(req, res, sock, head, opt) {
     // without a hostname, we won't know who the request is for
     const hostname = req.headers.host;
     if (!hostname) {
@@ -48,22 +48,24 @@ function maybe_bounce(req, res, sock, head) {
     }
 
     let subdomain = tldjs.getSubdomain(hostname);
+
+    if (subdomain && opt.subHost) {
+        const subHosts = Array.isArray(opt.subHost)
+            ? opt.subHost : [opt.subHost]
+        const subHost = subHosts.reduce((found, sub) => {
+            return found
+                || (subdomain.slice(-sub.length) == sub ? sub : '')
+        }, '')
+        subdomain = subHost
+            ? subdomain.slice(0, -(subHost.length + 1))
+            : subdomain
+    }
+
     if (!subdomain) {
         return false;
     }
 
-    let client = clients[subdomain];
-
-    if(!client || subdomain.indexOf('.') !== -1) {
-      subdomain = subdomain.split('.');
-      for(var i = 0; i <= subdomain.length; i++) {
-        let client_id = subdomain.slice(0, i).join('.');
-        client = clients[client_id];
-        if(client) {
-          break;
-        }
-      }
-    }
+    const client = clients[subdomain];
 
     // no such subdomain
     // we use 502 error to the client to signify we can't service the request
@@ -282,9 +284,8 @@ module.exports = function(opt) {
 
     app.get('/:req_id', function(req, res, next) {
         const req_id = req.params.req_id;
-
         // limit requested hostnames to 63 characters
-        if (! /^[a-z0-9\.]{4,63}$/.test(req_id)) {
+        if (! /^[a-z0-9-]{4,63}$/.test(req_id)) {
             const err = new Error('Invalid subdomain. Subdomains must be lowercase and between 4 and 63 alphanumeric characters.');
             err.statusCode = 403;
             return next(err);
@@ -323,8 +324,7 @@ module.exports = function(opt) {
         });
 
         debug('request %s', req.url);
-        var configuredHost = opt.host;
-        if (configuredHost !== req.headers.host && maybe_bounce(req, res, null, null)) {
+        if (maybe_bounce(req, res, null, null, opt)) {
             return;
         };
 
@@ -340,7 +340,7 @@ module.exports = function(opt) {
             console.error('ws socket', err);
         });
 
-        if (maybe_bounce(req, null, socket, head)) {
+        if (maybe_bounce(req, null, socket, head, opt)) {
             return;
         };
 

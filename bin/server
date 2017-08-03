@@ -17,8 +17,8 @@ const argv = optimist
         default: '80',
         describe: 'listen on this port for outside requests'
     })
-    .options('host', {
-      describe: 'listen on this host for outside requests'
+    .options('subhost', {
+        describe: 'additionally listen on this sub host for outside requests (can use this option multiple times)'
     })
     .options('max-sockets', {
         default: 10,
@@ -33,14 +33,14 @@ if (argv.help) {
 
 if(process.env.port){ argv.port=process.env.port }
 if(process.env.PORT){ argv.port=process.env.PORT }
-if(process.env.host){ argv.host=process.env.host }
-if(process.env.HOST){ argv.host=process.env.HOST }
+if(process.env.subhost){ argv.host=process.env.subhost }
+if(process.env.SUBHOST){ argv.host=process.env.subhost }
 
 const server = require('../server')({
     max_tcp_sockets: argv['max-sockets'],
     secure: argv.secure,
     port: argv.port,
-    host: argv.host
+    subHost: argv['sub-host']
 });
 
 server.listen(argv.port, () => {
