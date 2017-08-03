@@ -31,10 +31,8 @@ if (argv.help) {
     process.exit();
 }
 
-if(process.env.port){ argv.port=process.env.port }
 if(process.env.PORT){ argv.port=process.env.PORT }
-if(process.env.subhost){ argv.host=process.env.subhost }
-if(process.env.SUBHOST){ argv.host=process.env.subhost }
+if(process.env.SUBHOST){ argv.host=process.env.SUBHOST }
 
 const server = require('../server')({
     max_tcp_sockets: argv['max-sockets'],
