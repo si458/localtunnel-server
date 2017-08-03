@@ -31,6 +31,7 @@ if (argv.help) {
 const server = require('../server')({
     max_tcp_sockets: argv['max-sockets'],
     secure: argv.secure
+    port: argv.port,
 });
 
 server.listen(argv.port, () => {
