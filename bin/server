@@ -32,13 +32,13 @@ if (argv.help) {
 }
 
 if(process.env.PORT){ argv.port=process.env.PORT }
-if(process.env.SUBHOST){ argv.host=process.env.SUBHOST }
+if(process.env.SUBHOST){ argv.subhost=process.env.SUBHOST }
 
 const server = require('../server')({
     max_tcp_sockets: argv['max-sockets'],
     secure: argv.secure,
     port: argv.port,
-    subHost: argv['sub-host']
+    subHost: argv.subhost
 });
 
 server.listen(argv.port, () => {
