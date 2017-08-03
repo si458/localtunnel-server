@@ -47,17 +47,17 @@ function maybe_bounce(req, res, sock, head) {
         return false;
     }
 
-    const subdomain = tldjs.getSubdomain(hostname);
+    let subdomain = tldjs.getSubdomain(hostname);
     if (!subdomain) {
         return false;
     }
 
-    const client = clients[subdomain];
+    let client = clients[subdomain];
 
     if(!client || subdomain.indexOf('.') !== -1) {
       subdomain = subdomain.split('.');
       for(var i = 0; i <= subdomain.length; i++) {
-        client_id = subdomain.slice(0, i).join('.');
+        let client_id = subdomain.slice(0, i).join('.');
         client = clients[client_id];
         if(client) {
           break;
@@ -324,7 +324,7 @@ module.exports = function(opt) {
 
         debug('request %s', req.url);
         var configuredHost = opt.host;
-        if (configuredHost !== req.headers.host && maybe_bounce(req, res, null, null)) { 
+        if (configuredHost !== req.headers.host && maybe_bounce(req, res, null, null)) {
             return;
         };
 
